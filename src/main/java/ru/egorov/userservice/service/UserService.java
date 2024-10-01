@@ -1,6 +1,7 @@
 package ru.egorov.userservice.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.egorov.userservice.dto.UserDTO;
 import ru.egorov.userservice.entity.User;
@@ -13,8 +14,17 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public User create(UserDTO dto) {
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        if (userRepository.findByUsername(dto.getUsername()) != null) {
+            throw new IllegalArgumentException("User with this username already exists");
+        }
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+        dto.setConfirmPassword(null);
         return userRepository.save(User.builder()
                 .username(dto.getUsername())
                 .password(dto.getPassword())
@@ -29,6 +39,10 @@ public class UserService {
     public User findById(Long id) {
         return userRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("User not found. ID: " + id));
+    }
+
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public User update(User user) {

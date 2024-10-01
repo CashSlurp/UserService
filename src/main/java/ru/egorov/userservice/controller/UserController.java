@@ -27,13 +27,18 @@ public class UserController {
         return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
     }
 
+    @GetMapping("/{username}")
+    public ResponseEntity<User> findByUsername(@PathVariable String username) {
+        return new ResponseEntity<>(userService.findByUsername(username), HttpStatus.OK);
+    }
+
     @PutMapping
     public ResponseEntity<User> update(@RequestBody User user) {
         return new ResponseEntity<>(userService.update(user), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public HttpStatus delete(Long id) {
+    public HttpStatus delete(@PathVariable Long id) {
         userService.delete(id);
         return HttpStatus.OK;
     }
