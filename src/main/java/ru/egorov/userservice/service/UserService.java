@@ -1,6 +1,8 @@
 package ru.egorov.userservice.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.egorov.userservice.dto.UserDTO;
@@ -16,6 +18,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
     public User create(UserDTO dto) {
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("Passwords do not match");
@@ -25,6 +30,7 @@ public class UserService {
         }
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         dto.setConfirmPassword(null);
+        kafkaTemplate.send("user-creation", dto.getUsername());
         return userRepository.save(User.builder()
                 .username(dto.getUsername())
                 .password(dto.getPassword())
