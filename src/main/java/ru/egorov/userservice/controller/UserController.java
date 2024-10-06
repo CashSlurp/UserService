@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -20,6 +21,20 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> create(@RequestBody UserDTO dto) {
         return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserDTO dto) {
+        try {
+            boolean loginSuccess = userService.login(dto.getUsername(), dto.getPassword());
+            if (loginSuccess) {
+                return ResponseEntity.ok(dto);
+            } else {
+                return ResponseEntity.status(401).body("Invalid username or password");
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(401).body(ex.getMessage());
+        }
     }
 
     @GetMapping

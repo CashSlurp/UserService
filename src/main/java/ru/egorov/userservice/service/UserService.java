@@ -38,6 +38,20 @@ public class UserService {
                 .build());
     }
 
+    public boolean login(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            System.out.println(passwordEncoder.encode(password));
+            return true;
+        }
+        else {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
+    }
+
     public List<User> findAll() {
         return userRepository.findAll();
     }
